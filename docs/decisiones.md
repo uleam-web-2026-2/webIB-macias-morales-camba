@@ -1,9 +1,9 @@
-## El listado usa table y las celdas usan scope
-**Elegido:** Una etiqueta `<table>` estructurada con `<thead>`, `<tbody>`, y cabeceras marcadas con `<th scope="col">`.
-**Descartado:** Usar una lista (`<ul>`) o contenedores genéricos (`div`) con texto suelto.
-**Consecuencia que evita:** Permite que los lectores de pantalla anuncien correctamente el nombre de la columna al leer cada celda (por ejemplo, "Estado: Abierto" en lugar de decir solo "Abierto"), facilitando la comparación de datos tabulares.
+## Decisión 1 — la tabla en pantalla estrecha
+Elegimos la opción 2 (Cada fila se convierte en un bloque con sus datos uno debajo de otro mediante estilos responsivos) porque en pantallas de celulares pequeños (360 píxeles) una tabla con 5 columnas se desborda y deforma la interfaz de control. 
+Para el rol de Administrador, la consecuencia es que podrá revisar los eventos y sus estados operativos con un desplazamiento vertical natural y táctil sin sufrir con el zoom horizontal. 
+Lo que se pierde es la vista global comparativa de lado a lado de una tabla de escritorio, pero se gana una lectura fluida en campo o desde dispositivos móviles.
 
-## El pie usa footer y la hora usa time
-**Elegido:** <footer> con el texto dentro y la marca de tiempo dentro de `<time datetime="2026-09-11T09:40">`.
-**Descartado:** Un `<div class="footer">` con el texto corrido.
-**Consecuencia que evita:** El `footer` se anuncia como región de pie de página y se puede saltar directamente desde el lector de pantalla; un `div` no. Además, el atributo `datetime` deja la fecha legible por máquinas.
+## Decisión 2 — Elección de columnas esenciales
+Elegimos mostrar estrictamente 5 columnas (ID Evento, Cliente, Tipo de Evento, Invitados y Estado) porque son los datos críticos que el Administrador de catering necesita de un solo vistazo para priorizar la compra de insumos y la preparación en cocina. 
+La consecuencia es que la pantalla principal se mantiene limpia y rápida de procesar. 
+Lo que se pierde en esta vista general es el detalle de los platos específicos seleccionados o el desglose de los chefs asignados, los cuales requerirán un clic de detalle adicional.
