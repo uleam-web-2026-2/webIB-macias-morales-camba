@@ -73,54 +73,33 @@ Un caso comparable que se estancó en el mercado local son las empresas tradicio
 erDiagram
     CLIENTE ||--o{ EVENTO_PEDIDO : "registra"
     EVENTO_PEDIDO }|--|{ PLATO_MENU : "incluye"
+
     CLIENTE {
-        int id
+        int id_cliente PK
         string nombre
         string correo
         string telefono
     }
+    
     EVENTO_PEDIDO {
-        int id
+        int id_evento PK
         date fecha_evento
         string tipo_evento
         int numero_invitados
         string lugar_entrega
         string estado
-        decimal total
+        float total
     }
+    
     PLATO_MENU {
-        int id
+        int id_plato PK
         string nombre
         string categoria
-        decimal precio_por_persona
+        float precio_por_persona
         int stock_insumos
     }
-
-
-### Diagrama del modelo completo
-
-```mermaid
-erDiagram
-    CLIENTE ||--o{ PEDIDO : "realiza"
-    PEDIDO }|--o{ PRODUCTO : "incluye"
-    CLIENTE {
-        string id_cliente
-        string nombre
-        string correo
-        string telefono
-    }
-    PEDIDO {
-        string id_pedido
-        date fecha
-        string tipo_entrega
-        string direccion_o_punto
-        string estado
-        decimal total
-    }
-    PRODUCTO {
- stoc
 ```
-## 5. Máquina de estados
+
 
 ## 5. Máquina de estados
 
@@ -168,7 +147,7 @@ stateDiagram-v2
 | **Cambiar el estado del pedido (cocina/servicio)** | No | Sí |
 | **Gestionar stock de insumos y platos** | No | Sí |
 
-## 7. Mapa de vistas por rol
+
 ## 7. Mapa de vistas por rol
 
 | Vista | Rol | Qué datos muestra | Acciones | Cómo se ve el estado |
