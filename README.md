@@ -1,47 +1,50 @@
-# Svelte + TS + Vite
+🍽️ Manabí Catering & Banquetes | Aplicación para el Cliente Web
+Plataforma web diseñada para la gestión, cotización y reserva de servicios de catering, menús personalizados y organización de eventos corporativos y sociales en la provincia de Manabí.
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+👥 Equipo de Trabajo
+Kristin Ariana Morales Briones
 
-## Recommended IDE Setup
+Lída Macías
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+Zharick Camba
 
-## Need an official Svelte framework?
+Asignatura: Aplicaciones para el Cliente Web / Aplicaciones Web I
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+Institución: Universidad Laica Eloy Alfaro de Manabí (ULEAM)
 
-## Technical considerations
+Facultad: Facultad de Ciencias de la Vida y Tecnología
 
-**Why use this over SvelteKit?**
+📌 Descripción del Proyecto
+Manabí Catering & Banquetes es una solución web orientada a optimizar la experiencia de los clientes al contratar servicios de banquetería local. La plataforma permite explorar menús típicos e internacionales, cotizar eventos en tiempo real según el número de invitados, personalizar paquetes de catering y realizar el seguimiento del estado de la reserva y la logística de entrega.
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+Objetivos Principales:
+Digitalizar el servicio: Facilitar a los usuarios la cotización y contratación directa de servicios de catering desde una interfaz web moderna y responsiva.
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+Gestión de Pedidos: Implementar un flujo logístico claro para el control de eventos (desde la solicitud inicial y la confirmación del pago hasta la preparación y ejecución del evento).
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+Experiencia de Usuario (UX/UI): Diseñar una interfaz intuitiva adaptada a las necesidades del cliente y del administrador del servicio.
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+📂 Estructura del Repositorio
+El proyecto se organiza bajo la siguiente estructura de directorios:
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+Plaintext
+/
+├── docs/                 # Documentación del proyecto (Hitos, fichas técnicas y diagramas)
+├── src/                  # Código fuente de la aplicación web (Componentes y lógica del cliente)
+├── assets/               # Recursos visuales, imágenes y estilos globales
+└── README.md             # Documentación principal del proyecto
+🛠️ Tecnologías y Herramientas Utilizadas
+Lenguajes: HTML5, CSS3, TypeScript / JavaScript
 
-**Why include `.vscode/extensions.json`?**
+Framework / Librerías Frontend: Svelte
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+Control de Versiones: Git & GitHub
 
-**Why enable `allowJs` in the TS template?**
+Diseño y Modelado: Herramientas de prototipado y diagramación UML
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+📊 Fases del Proyecto (Hitos)
+Hito 1: Definición del negocio, modelo de datos, diagrama de estados del pedido y maquetación base.
 
-**Why is HMR not preserving my local component state?**
+Hito 2: Implementación de componentes interactivos con tipado estricto y lógica de vistas por roles (Cliente / Administrador).
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+Universidad Laica Eloy Alfaro de Manabí (ULEAM) - 2026
