@@ -5,6 +5,11 @@ export const eventos: EventoPedido[] = [
     tipoEvento: "corporativo", numeroInvitados: 200,
     lugarEntrega: "Centro de convenciones, Manta",
     estado: "cotizacion_registrada" },
-  // aquí agregas el evento 1042 (Valeria Zambrano, boda, 150 invitados, estado "en_cocina")
-  // y el 1043 (Carlos Mendoza, quince_anos, 80 invitados, estado "insumos_comprados")
+    { id: 1042, cliente: "Valeria Zambrano", fechaEvento: "2026-12-15",
+    tipoEvento: "boda", numeroInvitados: 150,
+    lugarEntrega: "Quinta San Alejo, Portoviejo", estado: "en_cocina" },
+  { id: 1043, cliente: "Carlos Mendoza", fechaEvento: "2026-11-20",
+    tipoEvento: "quince_anos", numeroInvitados: 80,
+    lugarEntrega: "Salón Montecristi", estado: "insumos_comprados" },
+
 ];
