@@ -1,27 +1,36 @@
 <section aria-labelledby="titulo-nuevo">
   <h2 id="titulo-nuevo">Nuevo Pedido de Catering</h2>
-  
-  <form action="#" method="post">
-    
-    <!-- Campo 1: Nombre del Cliente -->
-    <label for="nombre-cliente">Nombre del cliente</label>
-    <input type="text" id="nombre-cliente" name="nombre_cliente" required>
 
-    <!-- Campo 2: Tipo de Evento -->
+  <form id="form-nuevo" action="#" method="post" novalidate>
+    <label for="cliente">Nombre del cliente</label>
+    <input type="text" id="cliente" name="cliente" required
+      aria-describedby="cliente-error">
+    <p id="cliente-error" class="mensaje-error"></p>
+
     <label for="tipo-evento">Tipo de evento</label>
-    <select id="tipo-evento" name="tipo_evento">
-      <option>Boda</option>
-      <option>Quince años</option>
-      <option>Corporativo</option>
+    <select id="tipo-evento" name="tipo_evento" required>
+      <option value="boda">Boda</option>
+      <option value="quince_anos">Quince años</option>
+      <option value="corporativo">Corporativo</option>
     </select>
 
-    <!-- Campo 3: Número de Invitados (Con manejo de error accesible) -->
-    <label for="numero-invitados">Número de invitados</label>
-    <input type="text" id="numero-invitados" name="numero_invitados" required aria-invalid="true" aria-describedby="invitados-error">
-    <p id="invitados-error" class="mensaje-error">Error: Ingrese una cantidad válida de invitados para el banquete.</p>
+    <label for="fecha-evento">Fecha del evento</label>
+    <input type="date" id="fecha-evento" name="fecha_evento" required
+      aria-describedby="fecha-evento-error">
+    <p id="fecha-evento-error" class="mensaje-error"></p>
 
-    <!-- Botón de Envío -->
+    <label for="invitados">Número de invitados (1 a 1000)</label>
+    <input type="number" id="invitados" name="invitados" required
+      min="1" max="1000" aria-describedby="invitados-error">
+    <p id="invitados-error" class="mensaje-error"></p>
+
+    <label for="lugar">Lugar de entrega</label>
+    <input type="text" id="lugar" name="lugar" required
+      aria-describedby="lugar-error">
+    <p id="lugar-error" class="mensaje-error"></p>
+
     <button type="submit">Registrar Cotización</button>
-
   </form>
+
+  <p id="mensaje" role="status"></p>
 </section>

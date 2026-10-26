@@ -24,3 +24,13 @@ button {
 .en_cocina { background: #e8710a; }
 .en_servicio { background: #1a73e8; }
 .finalizado { background: #1e8e3e; }
+
+.mensaje-error {
+  color: #b3261e;
+  margin: .3rem 0 0;
+  font-size: .9rem;
+}
+
+[aria-invalid="true"] {
+  border: 2px solid #b3261e;
+}
