@@ -1,12 +1,32 @@
 import { eventos } from "./datos";
 import { buscar } from "./dom";
-import { ESTADOS, nombreEstado, puedeCambiar } from "./estado";
-import type { EstadoEvento } from "./tipos";
+import { ESTADOS, nombreEstado, nombreTipo, puedeCambiar } from "./estado";
+import { pedir } from "./supabase";
+import type { EstadoEvento, EventoPedido } from "./tipos";
+import { mostrarDetalle } from "./detalle";
 
 function celda(texto: string): HTMLTableCellElement {
   const td = document.createElement("td");
   td.textContent = texto;
   return td;
+}
+
+// Pide los eventos a Supabase (con su cliente) y pinta la tabla.
+export async function cargarEventos(): Promise<void> {
+  const aviso = buscar("#aviso-listado");
+  aviso.textContent = "Cargando eventos…";
+  try {
+    const datos = await pedir<EventoPedido[]>(
+      "eventos_pedido?select=*,clientes(*)&order=fecha_evento.asc",
+    );
+    eventos.length = 0;
+    eventos.push(...datos);
+    pintar();
+    aviso.textContent = "";
+  } catch {
+    aviso.textContent =
+      "No se pudieron cargar los eventos. Revise su conexión e intente de nuevo.";
+  }
 }
 
 // Pinta el listado completo desde el arreglo. Nadie más toca la tabla.
@@ -17,9 +37,9 @@ export function pintar(): void {
     const fila = document.createElement("tr");
     fila.id = "fila-" + e.id;
     fila.appendChild(celda("EV-" + e.id));
-    fila.appendChild(celda(e.cliente));
-    fila.appendChild(celda(e.tipoEvento));
-    fila.appendChild(celda(String(e.numeroInvitados)));
+    fila.appendChild(celda(e.clientes ? e.clientes.nombre : "—"));
+    fila.appendChild(celda(nombreTipo(e.tipo_evento)));
+    fila.appendChild(celda(String(e.numero_invitados)));
 
     // El estado: el punto de color y, además, la palabra.
     const tdEstado = document.createElement("td");
@@ -33,6 +53,12 @@ export function pintar(): void {
 
     // Un botón por cada estado distinto del actual.
     const tdAcciones = document.createElement("td");
+        const botonDetalle = document.createElement("button");
+    botonDetalle.type = "button";
+    botonDetalle.textContent = "Ver detalle";
+    botonDetalle.setAttribute("aria-label", "Ver el detalle del evento " + e.id);
+    botonDetalle.addEventListener("click", () => mostrarDetalle(e.id));
+    tdAcciones.appendChild(botonDetalle);
     for (const nuevo of ESTADOS) {
       if (nuevo === e.estado) {
         continue;
@@ -52,7 +78,7 @@ export function pintar(): void {
 }
 
 // Atiende el clic: pregunta a la máquina de estados, cambia el dato
-// y vuelve a pintar.
+// y vuelve a pintar. (Por ahora el cambio es solo en pantalla.)
 function cambiarEstado(id: number, nuevo: EstadoEvento): void {
   const aviso = buscar("#aviso-listado");
   const evento = eventos.find((e) => e.id === id);
@@ -68,8 +94,5 @@ function cambiarEstado(id: number, nuevo: EstadoEvento): void {
   evento.estado = nuevo;
   pintar();
   aviso.textContent = "El evento " + id + " pasó a «" + nombreEstado(nuevo) + "».";
-
-  // Al pintar, el botón que se pulsó dejó de existir.
-  // El foco vuelve a la misma fila.
   buscar<HTMLButtonElement>("#fila-" + id + " button").focus();
 }

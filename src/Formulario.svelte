@@ -2,9 +2,11 @@
   <h2 id="titulo-nuevo">Nuevo Pedido de Catering</h2>
 
   <form id="form-nuevo" action="#" method="post" novalidate>
-    <label for="cliente">Nombre del cliente</label>
-    <input type="text" id="cliente" name="cliente" required
+    <label for="cliente">Cliente</label>
+    <select id="cliente" name="cliente" required
       aria-describedby="cliente-error">
+      <option value="">Elija un cliente…</option>
+    </select>
     <p id="cliente-error" class="mensaje-error"></p>
 
     <label for="tipo-evento">Tipo de evento</label>

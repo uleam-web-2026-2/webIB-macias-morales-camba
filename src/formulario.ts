@@ -1,10 +1,8 @@
-import { eventos } from "./datos";
 import { buscar } from "./dom";
-import { pintar } from "./listado";
-import type { EventoPedido, TipoEvento } from "./tipos";
-import {
-  errorCliente, errorFecha, errorInvitados, errorLugar,
-} from "./validar";
+import { cargarEventos } from "./listado";
+import { crear, ErrorSupabase, pedir } from "./supabase";
+import type { Cliente, EventoPedido, TipoEvento } from "./tipos";
+import { errorFecha, errorInvitados, errorLugar } from "./validar";
 
 // Revisa un campo y escribe el aviso junto a él.
 // Devuelve true si el campo está bien.
@@ -15,10 +13,8 @@ function revisar(
   const aviso = buscar("#" + id + "-error");
   let texto = "";
   if (!campo.checkValidity()) {
-    // Falló una regla que conoce el navegador: required, type, min, max.
     texto = avisoDelNavegador;
   } else {
-    // El navegador lo dio por bueno: decide la regla del negocio.
     texto = avisoDelNegocio;
   }
   aviso.textContent = texto;
@@ -26,25 +22,44 @@ function revisar(
   return texto === "";
 }
 
+// Llena la lista de clientes con los que hay en Supabase.
+async function cargarClientes(): Promise<void> {
+  const lista = buscar<HTMLSelectElement>("#cliente");
+  try {
+    const clientes = await pedir<Cliente[]>("clientes?select=*&order=nombre.asc");
+    for (const c of clientes) {
+      const opcion = document.createElement("option");
+      opcion.value = String(c.id);
+      opcion.textContent = c.nombre;
+      lista.appendChild(opcion);
+    }
+  } catch {
+    buscar("#mensaje").textContent =
+      "No se pudieron cargar los clientes. Recargue la página.";
+  }
+}
+
 export function iniciarFormulario(): void {
   const form = buscar<HTMLFormElement>("#form-nuevo");
   const mensaje = buscar("#mensaje");
+  cargarClientes();
 
-  form.addEventListener("submit", (evento) => {
+  form.addEventListener("submit", async (evento) => {
     // 1 · Detener el envío: la página no se recarga y lo escrito se conserva.
     evento.preventDefault();
-        // 2 · Leer y convertir: del formulario todo llega como texto.
+
+    // 2 · Leer y convertir: del formulario todo llega como texto.
     const datos = new FormData(form);
-    const cliente = String(datos.get("cliente")).trim();
-    const tipoEvento = String(datos.get("tipo_evento"));
+    const clienteId = Number(datos.get("cliente"));
+    const tipoEvento = String(datos.get("tipo_evento")) as TipoEvento;
     const fechaEvento = String(datos.get("fecha_evento"));
     const invitados = Number(datos.get("invitados"));
     const lugar = String(datos.get("lugar")).trim();
-     // 3 · Validar campo por campo y avisar junto a cada uno.
+
+    // 3 · Validar campo por campo y avisar junto a cada uno.
     let valido = true;
     if (!revisar("cliente",
-      "Error: escriba el nombre del cliente. Es obligatorio.",
-      errorCliente(cliente))) valido = false;
+      "Error: elija un cliente de la lista.", "")) valido = false;
     if (!revisar("fecha-evento",
       "Error: elija la fecha del evento. Es obligatoria.",
       errorFecha(fechaEvento))) valido = false;
@@ -55,26 +70,36 @@ export function iniciarFormulario(): void {
       "Error: escriba el lugar de entrega. Es obligatorio.",
       errorLugar(lugar))) valido = false;
 
-        if (!valido) {
+    if (!valido) {
       mensaje.textContent = "No se registró. Corrija los campos marcados.";
       buscar<HTMLInputElement>('#form-nuevo [aria-invalid="true"]').focus();
       return;
     }
 
-    // 4 · Todo pasó: primero cambia el dato, después se pinta.
-    const nuevo: EventoPedido = {
-      id: Math.max(...eventos.map((e) => e.id)) + 1,
-      cliente: cliente,
-      fechaEvento: fechaEvento,
-      tipoEvento: tipoEvento as TipoEvento,
-      numeroInvitados: invitados,
-      lugarEntrega: lugar,
-      estado: "cotizacion_registrada",
-    };
-    eventos.push(nuevo);
-    pintar();
+    // 4 · Enviar a Supabase. Si la base lo rechaza, lo escrito se conserva.
+    try {
+      await crear<EventoPedido>("eventos_pedido", {
+        cliente_id: clienteId,
+        fecha_evento: fechaEvento,
+        tipo_evento: tipoEvento,
+        numero_invitados: invitados,
+        lugar_entrega: lugar,
+      });
+    } catch (error) {
+      if (error instanceof ErrorSupabase &&
+        (error.status === 401 || error.status === 403)) {
+        mensaje.textContent =
+          "No se registró: debe iniciar sesión para crear un evento.";
+      } else {
+        mensaje.textContent =
+          "No se pudo registrar el evento. Revise su conexión e intente de nuevo.";
+      }
+      return;
+    }
+
+    // 5 · Se creó: se limpia el formulario y se vuelve a pedir el listado.
     form.reset();
-    mensaje.textContent =
-      "Evento EV-" + nuevo.id + " registrado. Ya está en el listado.";
+    await cargarEventos();
+    mensaje.textContent = "Evento registrado. Ya está en el listado.";
   });
 }

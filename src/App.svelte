@@ -33,5 +33,10 @@
  </div>
  <!-- CAMBIO -->
  <p id="aviso-listado" role="status"></p>
+   <section id="detalle" aria-labelledby="titulo-detalle" hidden>
+    <h2 id="titulo-detalle" tabindex="-1">Detalle del evento</h2>
+    <div id="detalle-contenido" role="status"></div>
+    <button type="button" id="cerrar-detalle">Cerrar detalle</button>
+  </section>
  <Formulario />
 </main>

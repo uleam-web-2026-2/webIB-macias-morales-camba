@@ -1,4 +1,4 @@
-import type { EstadoEvento } from "./tipos";
+import type { EstadoEvento, TipoEvento } from "./tipos";
 
 // Todos los estados, en el orden en que se muestran los botones.
 export const ESTADOS: EstadoEvento[] = [
@@ -24,4 +24,10 @@ export function puedeCambiar(
   if (actual === "en_cocina" && nuevo === "en_servicio") return true;
   if (actual === "en_servicio" && nuevo === "finalizado") return true;
   return false;
+}
+
+export function nombreTipo(tipo: TipoEvento): string {
+  if (tipo === "boda") return "Boda";
+  if (tipo === "quince_anos") return "Quince años";
+  return "Corporativo";
 }
