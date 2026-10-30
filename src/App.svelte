@@ -11,6 +11,18 @@
 </header>
 
 <main>
+<section aria-labelledby="titulo-sesion">
+    <h2 id="titulo-sesion">Sesión</h2>
+    <p id="estado-sesion" role="status">Sin sesión iniciada.</p>
+    <form id="form-sesion" novalidate>
+      <label for="correo-sesion">Correo</label>
+      <input type="email" id="correo-sesion" name="correo" required>
+      <label for="clave-sesion">Contraseña</label>
+      <input type="password" id="clave-sesion" name="clave" required>
+      <button type="submit">Iniciar sesión</button>
+    </form>
+    <button type="button" id="cerrar-sesion" hidden>Cerrar sesión</button>
+  </section>
  <h2>Listado de eventos activos</h2>
  <!-- CAMBIO -->
  <div class="tabla-ancha">
