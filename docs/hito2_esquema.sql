@@ -57,3 +57,10 @@ create policy "Permitir lectura publica de evento_plato"
 -- Crear eventos: solo quien inició sesión
 create policy "Permitir crear eventos a usuarios autenticados"
   on eventos_pedido for insert to authenticated with check (true);
+
+grant update on eventos_pedido to authenticated;
+create policy "Con sesión se cambian eventos"
+on eventos_pedido for update
+to authenticated
+using (true)
+with check (true);

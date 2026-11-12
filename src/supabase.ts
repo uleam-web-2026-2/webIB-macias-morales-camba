@@ -53,3 +53,30 @@ export async function crear<T>(tabla: string, fila: object): Promise<T> {
   const filas = await respuesta.json();
   return filas[0];
 }
+
+// Resultado de un cambio: el código con el que respondió Supabase
+// y las filas que realmente cambiaron.
+export interface ResultadoCambio<T> {
+  codigo: number;
+  filas: T[];
+}
+
+// Cambiar: modifica una fila. Con "return=representation", Supabase
+// devuelve la fila cambiada; si RLS no deja tocarla, devuelve [] (200).
+export async function cambiar<T>(
+  tabla: string,
+  id: number,
+  cambios: object,
+): Promise<ResultadoCambio<T>> {
+  const respuesta = await fetch(`${URL_BASE}/rest/v1/${tabla}?id=eq.${id}`, {
+    method: "PATCH",
+    headers: {
+      ...cabeceras(),
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(cambios),
+  });
+  const filas: T[] = respuesta.ok ? await respuesta.json() : [];
+  return { codigo: respuesta.status, filas };
+}
