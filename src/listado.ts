@@ -1,9 +1,10 @@
 import { eventos } from "./datos";
 import { buscar } from "./dom";
 import { ESTADOS, nombreEstado, nombreTipo, puedeCambiar } from "./estado";
-import { cambiar, pedir } from "./supabase";
+import { SesionVencida, cambiar, pedir } from "./supabase";
 import type { EstadoEvento, EventoPedido } from "./tipos";
 import { mostrarDetalle } from "./detalle";
+import { terminarSesion } from "./sesion";
 
 function celda(texto: string): HTMLTableCellElement {
   const td = document.createElement("td");
@@ -23,7 +24,12 @@ export async function cargarEventos(): Promise<void> {
     eventos.push(...datos);
     pintar();
     aviso.textContent = "";
-  } catch {
+    } catch (error) {
+    if (error instanceof SesionVencida) {
+      terminarSesion("Su sesión venció. Inicie sesión otra vez.");
+      await cargarEventos();
+      return;
+    }
     aviso.textContent =
       "No se pudieron cargar los eventos. Revise su conexión e intente de nuevo.";
   }

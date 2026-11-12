@@ -2,10 +2,35 @@ export const URL_BASE ="https://frfuumchapeknvbrgyzt.supabase.co";
 export const CLAVE_PUBLICA ="sb_publishable_cNNA0pkfkG6_BjZIVqplQA_ugbKFLCi";
 
 
-// El token de la sesión. Vale null mientras nadie haya iniciado sesión.
-let token: string | null = null;
-export function ponerToken(nuevo: string | null): void {
-  token = nuevo;
+const CLAVE_SESION = "manabi.sesion";
+
+export interface SesionGuardada {
+  token: string;
+  correo: string;
+}
+
+// Lo guardado es texto que cualquiera puede editar: se lee con cuidado.
+export function leerSesion(): SesionGuardada | null {
+  const guardado = localStorage.getItem(CLAVE_SESION);
+  if (guardado === null) return null;
+  try {
+    const dato = JSON.parse(guardado);
+    if (typeof dato.token === "string" && typeof dato.correo === "string") {
+      return dato;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  localStorage.removeItem(CLAVE_SESION);
+  return null;
+}
+
+export function guardarSesion(sesion: SesionGuardada | null): void {
+  if (sesion === null) {
+    localStorage.removeItem(CLAVE_SESION);
+  } else {
+    localStorage.setItem(CLAVE_SESION, JSON.stringify(sesion));
+  }
 }
 
 // Error que guarda el código con el que respondió Supabase.
@@ -17,10 +42,14 @@ export class ErrorSupabase extends Error {
   }
 }
 
+// Se lanza cuando Supabase responde 401: el token venció o fue alterado.
+export class SesionVencida extends Error {}
+
 function cabeceras(): Record<string, string> {
   const c: Record<string, string> = { apikey: CLAVE_PUBLICA };
-  if (token) {
-    c.Authorization = "Bearer " + token;
+  const sesion = leerSesion();
+  if (sesion !== null) {
+    c.Authorization = "Bearer " + sesion.token;
   }
   return c;
 }
@@ -30,6 +59,9 @@ export async function pedir<T>(ruta: string): Promise<T> {
   const respuesta = await fetch(`${URL_BASE}/rest/v1/${ruta}`, {
     headers: cabeceras(),
   });
+  if (respuesta.status === 401) {          
+    throw new SesionVencida();             
+  }                                        
   if (!respuesta.ok) {
     throw new ErrorSupabase(respuesta.status);
   }

@@ -1,5 +1,19 @@
 import { buscar } from "./dom";
-import { CLAVE_PUBLICA, URL_BASE, ponerToken } from "./supabase";
+import { CLAVE_PUBLICA, URL_BASE, guardarSesion, leerSesion } from "./supabase";
+
+function mostrarConSesion(correo: string): void {
+  buscar<HTMLFormElement>("#form-sesion").hidden = true;
+  buscar<HTMLButtonElement>("#cerrar-sesion").hidden = false;
+  buscar("#estado-sesion").textContent = "Sesión iniciada como " + correo + ".";
+}
+
+// Olvida el token y deja la pantalla como sin sesión.
+export function terminarSesion(mensaje: string): void {
+  guardarSesion(null);
+  buscar<HTMLFormElement>("#form-sesion").hidden = false;
+  buscar<HTMLButtonElement>("#cerrar-sesion").hidden = true;
+  buscar("#estado-sesion").textContent = mensaje;
+}
 
 // Pide el token a Supabase. Devuelve false si el correo o la contraseña no sirven.
 async function iniciarSesion(email: string, password: string): Promise<boolean> {
@@ -12,14 +26,14 @@ async function iniciarSesion(email: string, password: string): Promise<boolean> 
     return false;
   }
   const sesion = await respuesta.json();
-  ponerToken(sesion.access_token);
+  guardarSesion({ token: sesion.access_token, correo: sesion.user.email });
   return true;
 }
 
 export function iniciarPanelSesion(): void {
   const form = buscar<HTMLFormElement>("#form-sesion");
-  const estado = buscar("#estado-sesion");
   const cerrar = buscar<HTMLButtonElement>("#cerrar-sesion");
+  const estado = buscar("#estado-sesion");
 
   form.addEventListener("submit", async (evento) => {
     evento.preventDefault();
@@ -36,19 +50,22 @@ export function iniciarPanelSesion(): void {
         estado.textContent = "Correo o contraseña incorrectos.";
         return;
       }
-      estado.textContent = "Sesión iniciada como " + correo + ".";
       form.reset();
-      form.hidden = true;
-      cerrar.hidden = false;
+      mostrarConSesion(correo);
+      cerrar.focus();
     } catch {
       estado.textContent = "No se pudo iniciar sesión. Revise su conexión.";
     }
   });
 
+  // Al abrir la página: si había una sesión guardada, la pantalla la refleja.
+  const guardada = leerSesion();
+  if (guardada !== null) {
+    mostrarConSesion(guardada.correo);
+  }
+
   cerrar.addEventListener("click", () => {
-    ponerToken(null);
-    estado.textContent = "Sin sesión iniciada.";
-    form.hidden = false;
-    cerrar.hidden = true;
+    terminarSesion("Sin sesión iniciada.");
+    buscar<HTMLInputElement>("#sesion-correo").focus();
   });
 }
