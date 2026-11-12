@@ -1,7 +1,7 @@
 import { eventos } from "./datos";
 import { buscar } from "./dom";
 import { ESTADOS, nombreEstado, nombreTipo, puedeCambiar } from "./estado";
-import { pedir } from "./supabase";
+import { cambiar, pedir } from "./supabase";
 import type { EstadoEvento, EventoPedido } from "./tipos";
 import { mostrarDetalle } from "./detalle";
 
@@ -77,22 +77,43 @@ export function pintar(): void {
   }
 }
 
-// Atiende el clic: pregunta a la máquina de estados, cambia el dato
-// y vuelve a pintar. (Por ahora el cambio es solo en pantalla.)
-function cambiarEstado(id: number, nuevo: EstadoEvento): void {
+// Atiende el clic: primero cambia en Supabase (la fuente) y solo si
+// Supabase lo acepta cambia la copia de la pantalla.
+async function cambiarEstado(id: number, nuevo: EstadoEvento): Promise<void> {
   const aviso = buscar("#aviso-listado");
   const evento = eventos.find((e) => e.id === id);
   if (!evento) {
     return;
   }
   if (!puedeCambiar(evento.estado, nuevo)) {
-    aviso.textContent = "No se puede: el evento " + id + " está en «" +
-      nombreEstado(evento.estado) + "» y de ahí no pasa a «" +
-      nombreEstado(nuevo) + "».";
+    aviso.textContent = "No se puede pasar de «" +
+      nombreEstado(evento.estado) + "» a «" + nombreEstado(nuevo) + "».";
     return;
   }
-  evento.estado = nuevo;
+
+  aviso.textContent = "Guardando…";
+  let resultado;
+  try {
+    resultado = await cambiar<EventoPedido>("eventos_pedido", id, {
+      estado: nuevo,
+    });
+  } catch (error) {
+    console.error(error);
+    aviso.textContent = "Error: no hubo respuesta. El evento no cambió.";
+    return;
+  }
+  if (resultado.codigo !== 200) {
+    aviso.textContent =
+      "Error: el evento no cambió (respondió " + resultado.codigo + ").";
+    return;
+  }
+  if (resultado.filas.length === 0) {
+    aviso.textContent = "Error: el evento no cambió. No tiene permiso.";
+    return;
+  }
+
+  evento.estado = resultado.filas[0].estado;
   pintar();
   aviso.textContent = "El evento " + id + " pasó a «" + nombreEstado(nuevo) + "».";
-  buscar<HTMLButtonElement>("#fila-" + id + " button").focus();
+  document.querySelector<HTMLButtonElement>("#fila-" + id + " button")?.focus();
 }
