@@ -99,16 +99,20 @@ export async function cambiar<T>(
   tabla: string,
   id: number,
   cambios: object,
+  condicion = "",
 ): Promise<ResultadoCambio<T>> {
-  const respuesta = await fetch(`${URL_BASE}/rest/v1/${tabla}?id=eq.${id}`, {
-    method: "PATCH",
-    headers: {
-      ...cabeceras(),
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
+  const respuesta = await fetch(
+    `${URL_BASE}/rest/v1/${tabla}?id=eq.${id}${condicion}`,
+    {
+      method: "PATCH",
+      headers: {
+        ...cabeceras(),
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(cambios),
     },
-    body: JSON.stringify(cambios),
-  });
+  );
   const filas: T[] = respuesta.ok ? await respuesta.json() : [];
   return { codigo: respuesta.status, filas };
 }

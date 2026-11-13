@@ -62,7 +62,7 @@ export async function cargarEventos(): Promise<void> {
     eventos.push(...datos);
     pintar();
     aviso.textContent = mensajeVacio();
-    } catch (error) {
+  } catch (error) {
     if (error instanceof SesionVencida) {
       terminarSesion("Su sesión venció. Inicie sesión otra vez.");
       await cargarEventos();
@@ -97,7 +97,7 @@ export function pintar(): void {
 
     // Un botón por cada estado distinto del actual.
     const tdAcciones = document.createElement("td");
-        const botonDetalle = document.createElement("button");
+    const botonDetalle = document.createElement("button");
     botonDetalle.type = "button";
     botonDetalle.textContent = "Ver detalle";
     botonDetalle.setAttribute("aria-label", "Ver el detalle del evento " + e.id);
@@ -121,6 +121,30 @@ export function pintar(): void {
   }
 }
 
+// Un [] puede ser falta de permiso o una copia vieja. Se lee la fuente
+// para saber cuál: si el estado de Supabase es otro, la pantalla se pone al día.
+async function explicarVacio(
+  evento: EventoPedido, aviso: Element,
+): Promise<void> {
+  try {
+    const filas = await pedir<EventoPedido[]>(
+      "eventos_pedido?id=eq." + evento.id + "&select=*",
+    );
+    if (filas.length > 0 && filas[0].estado !== evento.estado) {
+      const antes = evento.estado;
+      evento.estado = filas[0].estado;
+      pintar();
+      aviso.textContent = "El evento " + evento.id + " ya había cambiado a «" +
+        nombreEstado(filas[0].estado) + "» desde otra pantalla (usted veía «" +
+        nombreEstado(antes) + "»). Se actualizó la pantalla; revise y vuelva a intentar.";
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  aviso.textContent = "Error: el evento no cambió. No tiene permiso.";
+}
+
 // Atiende el clic: primero cambia en Supabase (la fuente) y solo si
 // Supabase lo acepta cambia la copia de la pantalla.
 async function cambiarEstado(id: number, nuevo: EstadoEvento): Promise<void> {
@@ -138,9 +162,12 @@ async function cambiarEstado(id: number, nuevo: EstadoEvento): Promise<void> {
   aviso.textContent = "Guardando…";
   let resultado;
   try {
-    resultado = await cambiar<EventoPedido>("eventos_pedido", id, {
-      estado: nuevo,
-    });
+    resultado = await cambiar<EventoPedido>(
+      "eventos_pedido",
+      id,
+      { estado: nuevo },
+      "&estado=eq." + evento.estado,
+    );
   } catch (error) {
     console.error(error);
     aviso.textContent = "Error: no hubo respuesta. El evento no cambió.";
@@ -152,7 +179,7 @@ async function cambiarEstado(id: number, nuevo: EstadoEvento): Promise<void> {
     return;
   }
   if (resultado.filas.length === 0) {
-    aviso.textContent = "Error: el evento no cambió. No tiene permiso.";
+    await explicarVacio(evento, aviso);
     return;
   }
 
