@@ -24,6 +24,9 @@
     <button type="button" id="cerrar-sesion" hidden>Cerrar sesión</button>
   </section>
  <h2>Listado de eventos activos</h2>
+ <label for="filtro-estado">Filtrar por estado</label>
+ <select id="filtro-estado"></select>
+
  <!-- CAMBIO -->
  <div class="tabla-ancha">
  <table>

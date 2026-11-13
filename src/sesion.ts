@@ -66,6 +66,6 @@ export function iniciarPanelSesion(): void {
 
   cerrar.addEventListener("click", () => {
     terminarSesion("Sin sesión iniciada.");
-    buscar<HTMLInputElement>("#sesion-correo").focus();
+    buscar<HTMLInputElement>("#correo-sesion").focus();
   });
 }

@@ -6,6 +6,44 @@ import type { EstadoEvento, EventoPedido } from "./tipos";
 import { mostrarDetalle } from "./detalle";
 import { terminarSesion } from "./sesion";
 
+const CLAVE_FILTRO = "manabi.filtro";
+type Filtro = EstadoEvento | "todos";
+
+// Lo guardado se valida antes de usarlo: si no es un valor conocido, "todos".
+function leerFiltro(): Filtro {
+  const guardado = localStorage.getItem(CLAVE_FILTRO);
+  if (guardado === "todos" || ESTADOS.includes(guardado as EstadoEvento)) {
+    return guardado as Filtro;
+  }
+  return "todos";
+}
+
+function visibles(): EventoPedido[] {
+  const filtro = leerFiltro();
+  return eventos.filter((e) => filtro === "todos" || e.estado === filtro);
+}
+
+// Dos mensajes distintos: no hay eventos / ninguno coincide con el filtro.
+function mensajeVacio(): string {
+  if (eventos.length === 0) return "No hay eventos para mostrar.";
+  if (visibles().length === 0) return "Ningún evento coincide con el filtro.";
+  return "";
+}
+
+export function iniciarFiltro(): void {
+  const selector = buscar<HTMLSelectElement>("#filtro-estado");
+  selector.add(new Option("Todos", "todos"));
+  for (const estado of ESTADOS) {
+    selector.add(new Option(nombreEstado(estado), estado));
+  }
+  selector.value = leerFiltro();
+  selector.addEventListener("change", () => {
+    localStorage.setItem(CLAVE_FILTRO, selector.value);
+    pintar();
+    buscar("#aviso-listado").textContent = mensajeVacio();
+  });
+}
+
 function celda(texto: string): HTMLTableCellElement {
   const td = document.createElement("td");
   td.textContent = texto;
@@ -23,7 +61,7 @@ export async function cargarEventos(): Promise<void> {
     eventos.length = 0;
     eventos.push(...datos);
     pintar();
-    aviso.textContent = "";
+    aviso.textContent = mensajeVacio();
     } catch (error) {
     if (error instanceof SesionVencida) {
       terminarSesion("Su sesión venció. Inicie sesión otra vez.");
@@ -39,7 +77,7 @@ export async function cargarEventos(): Promise<void> {
 export function pintar(): void {
   const lista = buscar("#lista");
   lista.textContent = "";
-  for (const e of eventos) {
+  for (const e of visibles()) {
     const fila = document.createElement("tr");
     fila.id = "fila-" + e.id;
     fila.appendChild(celda("EV-" + e.id));
