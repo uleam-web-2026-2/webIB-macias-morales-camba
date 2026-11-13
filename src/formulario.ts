@@ -42,7 +42,48 @@ async function cargarClientes(): Promise<void> {
 export function iniciarFormulario(): void {
   const form = buscar<HTMLFormElement>("#form-nuevo");
   const mensaje = buscar("#mensaje");
-  cargarClientes();
+  cargarClientes().then(() => recuperarBorrador(form));
+  form.addEventListener("input", () => guardarBorrador(form));
+
+  const CLAVE_BORRADOR = "manabi.borrador";
+const CAMPOS = ["cliente", "tipo_evento", "fecha_evento", "invitados", "lugar"];
+
+// Guarda lo que hay escrito. Solo vive en esta pestaña (sessionStorage).
+function guardarBorrador(form: HTMLFormElement): void {
+  const datos = new FormData(form);
+  const borrador: Record<string, string> = {};
+  for (const campo of CAMPOS) {
+    borrador[campo] = String(datos.get(campo));
+  }
+  sessionStorage.setItem(CLAVE_BORRADOR, JSON.stringify(borrador));
+}
+
+// Lo guardado es texto que cualquiera puede editar: se lee con cuidado.
+function recuperarBorrador(form: HTMLFormElement): void {
+  const guardado = sessionStorage.getItem(CLAVE_BORRADOR);
+  if (guardado === null) return;
+  try {
+    const borrador = JSON.parse(guardado);
+    for (const campo of CAMPOS) {
+      const valor = borrador[campo];
+      const elemento = form.elements.namedItem(campo);
+      if (
+        typeof valor === "string" &&
+        (elemento instanceof HTMLInputElement ||
+          elemento instanceof HTMLSelectElement)
+      ) {
+        elemento.value = valor;
+        // Si la opción guardada ya no existe, el select vuelve a la primera.
+        if (elemento instanceof HTMLSelectElement && elemento.value !== valor) {
+          elemento.selectedIndex = 0;
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    sessionStorage.removeItem(CLAVE_BORRADOR);
+  }
+}
 
   form.addEventListener("submit", async (evento) => {
     // 1 · Detener el envío: la página no se recarga y lo escrito se conserva.
@@ -99,6 +140,7 @@ export function iniciarFormulario(): void {
 
     // 5 · Se creó: se limpia el formulario y se vuelve a pedir el listado.
     form.reset();
+      sessionStorage.removeItem(CLAVE_BORRADOR);
     await cargarEventos();
     mensaje.textContent = "Evento registrado. Ya está en el listado.";
   });
